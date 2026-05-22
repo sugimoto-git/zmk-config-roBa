@@ -1,9 +1,8 @@
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
-
-#define ZMK_POINTING_DEFAULT_SCRL_VAL 2
 #include <dt-bindings/zmk/pointing.h>
+#include <input/processors.dtsi>
 
 &mt {
     flavor = "balanced";
@@ -12,7 +11,8 @@
 
 &trackball {
     automouse-layer = <4>;
-    scroll-layers = <5>;
+    // scroll-layers is handled by Input Processor below.
+    // scroll-layers = <5>;
 
     // arrows {
     //     layers = <3>;
@@ -25,6 +25,16 @@
     //     wait-ms = <5>;
     //     tap-ms = <5>;
     // };
+};
+
+&trackball_listener {
+    scroller {
+        layers = <5>;
+        input-processors = <
+            &zip_xy_to_scroll_mapper
+            &zip_scroll_scaler 1 4
+        >;
+    };
 };
 
 / {
@@ -67,12 +77,6 @@
     };
 
     behaviors {
-        scroll_encoder: scroll_encoder {
-            compatible = "zmk,behavior-sensor-rotate";
-            #sensor-binding-cells = <0>;
-            bindings = <&msc SCRL_UP>, <&msc SCRL_DOWN>;
-        };
-
         lt_to_layer_0: lt_to_layer_0 {
             compatible = "zmk,behavior-hold-tap";
             label = "LAYER_TAP_TO_0";
@@ -93,8 +97,6 @@
 &kp Z             &kp X         &kp C    &kp V           &kp B  &lt_to_layer_0 6 SEMICOLON      &lt 4 SLASH       &kp N        &kp M  &kp COMMA  &kp DOT  &kp BACKSPACE
 &kp LEFT_COMMAND  &kp LEFT_ALT  &kp TAB  &kp LEFT_SHIFT  &mo 1  &kp LC(SPACE)                   &kp LEFT_COMMAND  &lt 2 SPACE                             &lt 5 ESCAPE
             >;
-
-            sensor-bindings = <&scroll_encoder>;
         };
 
         FUNCTION {
@@ -122,8 +124,6 @@
 &kp LEFT_COMMAND  &trans  &mkp MB4            &mkp MB5             &mkp MB3  &trans      &trans  &kp LC(LEFT_ARROW)  &kp LC(DOWN_ARROW)  &kp LC(UP_ARROW)  &kp LC(RIGHT_ARROW)  &trans
 &trans            &trans  &trans              &trans               &trans    &trans      &trans  &trans                                                                         &trans
             >;
-
-            sensor-bindings = <&scroll_encoder>;
         };
 
         MOUSE {
